@@ -1,64 +1,88 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+
+# 1. Load datasets from multiple formats
 csv_data = pd.read_csv("sales_data.csv")
 excel_data = pd.read_excel("sales_data.xlsx")
 json_data = pd.read_json("sales_data.json")
-print("CSV Data")
+
+print("CSV Data:")
 print(csv_data.head())
-print("\nExcel Data")
+print("\nExcel Data:")
 print(excel_data.head())
-print("\nJSON Data")
+print("\nJSON Data:")
 print(json_data.head())
-print("\nCSV Information")
+
+print("\nCSV Information:")
 csv_data.info()
-print("\nExcel Information")
+print("\nExcel Information:")
 excel_data.info()
-print("\nJSON Information")
+print("\nJSON Information:")
 json_data.info()
-print("\nMissing Values - CSV")
+
+print("\nMissing Values - CSV:")
 print(csv_data.isnull().sum())
-print("\nMissing Values - Excel")
+print("\nMissing Values - Excel:")
 print(excel_data.isnull().sum())
-print("\nMissing Values - JSON")
+print("\nMissing Values - JSON:")
 print(json_data.isnull().sum())
+
+# 2. Data Cleaning
 csv_data.drop_duplicates(inplace=True)
 excel_data.drop_duplicates(inplace=True)
 json_data.drop_duplicates(inplace=True)
+
 csv_data.fillna(0, inplace=True)
 excel_data.fillna(0, inplace=True)
 json_data.fillna(0, inplace=True)
+
+# 3. Concatenate Datasets
 sales = pd.concat(
     [csv_data, excel_data, json_data],
     ignore_index=True
 )
-print("\nMerged Dataset")
+print("\nMerged Dataset:")
 print(sales.head())
+
+# 4. Feature Calculation & Summary Statistics
 sales["Total"] = sales["Quantity"] * sales["Price"]
-print("\nSummary Statistics")
+
+print("\nSummary Statistics:")
 print(sales.describe())
+
 total_sales = sales["Total"].sum()
 print("\nTotal Sales =", total_sales)
+
 average_order = sales["Total"].mean()
 print("Average Order Value =", average_order)
+
 category_sales = sales.groupby("Category")["Total"].sum()
-print("\nSales by Category")
+print("\nSales by Category:")
 print(category_sales)
+
 category_distribution = sales["Category"].value_counts()
-print("\nCategory Distribution")
+print("\nCategory Distribution:")
 print(category_distribution)
+
+# 5. Visualizations
 plt.figure(figsize=(8, 5))
-category_sales.plot(kind="bar")
+category_sales.plot(kind="bar", color="skyblue", edgecolor="black")
 plt.title("Sales by Category")
 plt.xlabel("Category")
 plt.ylabel("Total Sales")
+plt.xticks(rotation=0)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.show()
+
 plt.figure(figsize=(6, 6))
-category_distribution.plot(kind="pie", autopct="%1.1f%%")
+category_distribution.plot(kind="pie", autopct="%1.1f%%", startangle=90)
 plt.title("Category Distribution")
 plt.ylabel("")
 plt.show()
+
 plt.figure(figsize=(6, 4))
-sales.boxplot(column="Total")
+sales.boxplot(column="Total", patch_artist=True, boxprops=dict(facecolor="lightgreen"))
 plt.title("Sales Box Plot")
 plt.ylabel("Total Sales")
+plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.show()
