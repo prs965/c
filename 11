@@ -1,71 +1,100 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-df = pd.read_csv("City_Air_Quality.csv")
+
+# 1. Load dataset 
+df = pd.read_csv("city_day.csv")
+
 print("First 5 Records:")
 print(df.head())
+
 print("\nDataset Shape:")
 print(df.shape)
+
 print("\nColumn Names:")
 print(df.columns.tolist())
+
 print("\nDataset Information:")
 df.info()
+
 print("\nMissing Values:")
 print(df.isnull().sum())
+
+# 2. Correct date format for city_day.csv (YYYY-MM-DD)
 df["Date"] = pd.to_datetime(
     df["Date"],
-    format="%d-%m-%Y"
+    format="%Y-%m-%d"
 )
+
+# Optional: Filter for a specific city since the dataset has multiple cities (e.g., 'Delhi')
+df = df[df["City"] == "Delhi"].copy()
+
 print("\nSummary Statistics:")
 print(df.describe())
-plt.figure(figsize=(10,5))
-plt.plot(df["Date"], df["AQI"], marker="o")
-plt.title("AQI Trend Over Time")
+
+# 3. AQI Trend Over Time
+plt.figure(figsize=(10, 5))
+plt.plot(df["Date"], df["AQI"], marker="o", color="tab:red", linestyle="-")
+plt.title("AQI Trend Over Time (Delhi)")
 plt.xlabel("Date")
 plt.ylabel("AQI")
 plt.xticks(rotation=45)
 plt.grid(True)
+plt.tight_layout()
 plt.show()
-plt.figure(figsize=(10,5))
-plt.plot(df["Date"], df["PM2.5"], label="PM2.5")
-plt.plot(df["Date"], df["PM10"], label="PM10")
-plt.plot(df["Date"], df["CO"], label="CO")
-plt.title("Pollutant Levels Over Time")
+
+# 4. Pollutant Levels Over Time
+plt.figure(figsize=(10, 5))
+plt.plot(df["Date"], df["PM2.5"], label="PM2.5", alpha=0.7)
+plt.plot(df["Date"], df["PM10"], label="PM10", alpha=0.7)
+plt.plot(df["Date"], df["CO"], label="CO", alpha=0.7)
+plt.title("Pollutant Levels Over Time (Delhi)")
 plt.xlabel("Date")
 plt.ylabel("Pollutant Level")
 plt.legend()
 plt.xticks(rotation=45)
 plt.grid(True)
+plt.tight_layout()
 plt.show()
-plt.figure(figsize=(10,5))
-plt.bar(df["Date"], df["AQI"])
+
+# 5. AQI Comparison by Date (sampled for readability if needed)
+plt.figure(figsize=(10, 5))
+plt.bar(df["Date"], df["AQI"], color="tab:orange")
 plt.title("AQI Comparison by Date")
 plt.xlabel("Date")
 plt.ylabel("AQI")
 plt.xticks(rotation=45)
+plt.tight_layout()
 plt.show()
-plt.figure(figsize=(7,5))
-plt.boxplot(df["AQI"].dropna())
+
+# 6. AQI Distribution Boxplot
+plt.figure(figsize=(7, 5))
+plt.boxplot(df["AQI"].dropna(), patch_artist=True, boxprops=dict(facecolor="lightblue"))
 plt.title("AQI Distribution")
 plt.ylabel("AQI")
+plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.show()
-plt.figure(figsize=(8,5))
-plt.scatter(df["PM2.5"], df["AQI"])
+
+# 7. Scatter Plots: Pollutants vs AQI
+plt.figure(figsize=(8, 5))
+plt.scatter(df["PM2.5"], df["AQI"], alpha=0.5, color="purple")
 plt.title("PM2.5 vs AQI")
 plt.xlabel("PM2.5")
 plt.ylabel("AQI")
 plt.grid(True)
 plt.show()
-plt.figure(figsize=(8,5))
-plt.scatter(df["PM10"], df["AQI"])
+
+plt.figure(figsize=(8, 5))
+plt.scatter(df["PM10"], df["AQI"], alpha=0.5, color="green")
 plt.title("PM10 vs AQI")
 plt.xlabel("PM10")
 plt.ylabel("AQI")
 plt.grid(True)
 plt.show()
-plt.figure(figsize=(8,5))
-plt.scatter(df["CO"], df["AQI"])
+
+plt.figure(figsize=(8, 5))
+plt.scatter(df["CO"], df["AQI"], alpha=0.5, color="brown")
 plt.title("CO vs AQI")
 plt.xlabel("CO")
-plt.ylabel("CO")
+plt.ylabel("AQI")  
 plt.grid(True)
 plt.show()
