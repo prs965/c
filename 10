@@ -1,8 +1,13 @@
 import pandas as pd
 import numpy as np
-df = pd.read_csv("RealEstate_Prices_Cleaned.csv")
+
+# 1. Load dataset (Make sure filename matches your local file, e.g., 'house_data.csv')
+df = pd.read_csv("house_data.csv")
+
 print("Original Data:")
 print(df.head())
+
+# 2. Clean column names
 df.columns = (
     df.columns
     .str.strip()
@@ -10,52 +15,74 @@ df.columns = (
     .str.replace(" ", "_")
     .str.replace(r"[^a-zA-Z0-9_]", "", regex=True)
 )
+
 print("\nColumn Names:")
 print(df.columns.tolist())
+
+# 3. Check for missing values
 print("\nMissing Values:")
 print(df.isnull().sum())
+
+# Handle missing values for numeric columns (fill with median)
 numeric_cols = df.select_dtypes(include=np.number).columns
 for col in numeric_cols:
     df[col] = df[col].fillna(df[col].median())
+
+# Handle missing values for categorical/object columns (fill with mode)
 categorical_cols = df.select_dtypes(include="object").columns
 for col in categorical_cols:
     df[col] = df[col].fillna(df[col].mode()[0])
+
 print("\nMissing Values After Cleaning:")
 print(df.isnull().sum())
 print("\nNo Additional Dataset Available for Merging.")
+
+# 4. Filter data
 filtered_data = df[df["price"] > 500000]
 print("\nHouses with Price Greater Than 500000:")
 print(filtered_data.head())
+
+# 5. Basic statistics and groupbys
 print("\nAverage House Price:")
 print(df["price"].mean())
+
 print("\nAverage Price by Bedrooms:")
 print(df.groupby("bedrooms")["price"].mean())
+
+# 6. Outlier removal using IQR method on 'price'
 Q1 = df["price"].quantile(0.25)
 Q3 = df["price"].quantile(0.75)
 IQR = Q3 - Q1
 lower_limit = Q1 - 1.5 * IQR
 upper_limit = Q3 + 1.5 * IQR
+
 print("\nLower Limit:", lower_limit)
 print("Upper Limit:", upper_limit)
+
 df_clean = df[
     (df["price"] >= lower_limit) &
     (df["price"] <= upper_limit)
 ]
+
 print("\nRecords Before Removing Outliers:", len(df))
 print("Records After Removing Outliers:", len(df_clean))
-categorical_cols = df_clean.select_dtypes(
-    include="object"
-).columns
-df_clean = pd.get_dummies(
-    df_clean,
-    columns=categorical_cols,
-    drop_first=True
-)
+
+# 7. One-hot encoding for categorical columns
+categorical_cols = df_clean.select_dtypes(include="object").columns
+if len(categorical_cols) > 0:
+    df_clean = pd.get_dummies(
+        df_clean,
+        columns=categorical_cols,
+        drop_first=True
+    )
+
 print("\nEncoded Data:")
 print(df_clean.head())
+
+# 8. Export final cleaned data
 df_clean.to_csv(
     "RealEstate_Prices_Final.csv",
     index=False
 )
-Page 1
+
 print("\nData Wrangling Completed Successfully!")
