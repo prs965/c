@@ -2,35 +2,48 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
-df = pd.read_csv("WA_Fn-UseC_-Telco-Customer-Churn.csv")
+
+# 1. Load dataset (Ensure filename matches your local CSV file)
+df = pd.read_csv("Telco-Customer-Churn.csv")
 print("Dataset Loaded Successfully!")
-print("\nFirst 5 Records")
+print("\nFirst 5 Records:")
 print(df.head())
-print("\nDataset Shape")
+
+print("\nDataset Shape:")
 print(df.shape)
-print("\nColumn Names")
+
+print("\nColumn Names:")
 print(df.columns.tolist())
-print("\nDataset Information")
+
+print("\nDataset Information:")
 df.info()
-print("\nMissing Values")
+
+print("\nMissing Values:")
 print(df.isnull().sum())
+
+# 2. Data Cleaning
 df["TotalCharges"] = pd.to_numeric(
     df["TotalCharges"],
     errors="coerce"
 )
+
 for col in df.select_dtypes(include="object").columns:
     df[col] = df[col].astype(str).str.strip()
+
 for col in df.select_dtypes(include=np.number).columns:
     df[col] = df[col].fillna(df[col].median())
+
 for col in df.select_dtypes(include="object").columns:
     df[col] = df[col].fillna(df[col].mode()[0])
-print("\nMissing Values After Cleaning")
+
+print("\nMissing Values After Cleaning:")
 print(df.isnull().sum())
-print("\nDuplicate Records")
-print(df.duplicated().sum())
+
+print("\nDuplicate Records:", df.duplicated().sum())
 df.drop_duplicates(inplace=True)
-print("\nShape After Removing Duplicates")
-print(df.shape)
+print("Shape After Removing Duplicates:", df.shape)
+
+# 3. Target Variable Encoding
 df["Churn"] = df["Churn"].replace({
     "Yes": 1,
     "No": 0
@@ -40,6 +53,8 @@ df["Churn"] = pd.to_numeric(
     errors="coerce"
 )
 df.dropna(subset=["Churn"], inplace=True)
+
+# 4. Feature Engineering
 df["AvgMonthlySpend"] = (
     df["TotalCharges"] / (df["tenure"] + 1)
 )
@@ -49,6 +64,8 @@ df["LongTermCustomer"] = np.where(
     0
 )
 print("\nFeature Engineering Completed")
+
+# 5. Outlier Handling using IQR
 numeric_cols = [
     "tenure",
     "MonthlyCharges",
@@ -62,23 +79,31 @@ for col in numeric_cols:
     upper = Q3 + 1.5 * IQR
     df[col] = df[col].clip(lower, upper)
 print("\nOutliers Handled")
-df.drop("customerID", axis=1, inplace=True)
+
+# 6. Drop unnecessary columns and Encode Categorical Variables
+if "customerID" in df.columns:
+    df.drop("customerID", axis=1, inplace=True)
+
 categorical_cols = df.select_dtypes(
     include="object"
 ).columns
 for col in categorical_cols:
     encoder = LabelEncoder()
     df[col] = encoder.fit_transform(df[col])
+
 X = df.drop("Churn", axis=1)
 y = df["Churn"]
+
+# 7. Train-Test Split (Fixed Syntax)
 X_train, X_test, y_train, y_test = train_test_split(
-Page 1
-)
     X,
     y,
     test_size=0.20,
     random_state=42,
     stratify=y
+)
+
+# 8. Feature Scaling
 scale_cols = [
     "tenure",
     "MonthlyCharges",
@@ -93,10 +118,13 @@ X_test[scale_cols] = scaler.transform(
     X_test[scale_cols]
 )
 print("\nScaling Completed")
-print("\nTraining Data Shape")
+
+print("\nTraining Data Shape:")
 print(X_train.shape)
-print("\nTesting Data Shape")
+print("\nTesting Data Shape:")
 print(X_test.shape)
+
+# 9. Save Cleaned Dataset
 df.to_csv(
     "Telecom_Customer_Churn_Cleaned.csv",
     index=False
