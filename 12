@@ -1,52 +1,74 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 1. Load dataset
 df = pd.read_csv("Superstore.csv", encoding="latin1")
+
 print("First 5 Records:")
-print(df.head())
+display(df.head())
+
 print("\nDataset Shape:")
 print(df.shape)
+
 print("\nColumn Names:")
 print(df.columns.tolist())
+
 print("\nDataset Information:")
-df.info()
+print(df.info())
+
 print("\nMissing Values:")
 print(df.isnull().sum())
+
+# 2. Clean column names
 df.columns = (
     df.columns
     .str.strip()
     .str.lower()
     .str.replace(" ", "_")
 )
+
 print("\nCleaned Column Names:")
 print(df.columns.tolist())
+
+# 3. Region Sales Analysis
 region_sales = df.groupby("region")["sales"].sum()
 print("\nTotal Sales by Region:")
 print(region_sales)
+
+# 4. Bar chart: Total Sales by Region
 plt.figure(figsize=(8, 5))
-region_sales.plot(kind="bar")
-plt.title("Total Sales by Region")
-plt.xlabel("Region")
-plt.ylabel("Sales")
+region_sales.plot(kind="bar", color="#3498db", edgecolor="black")
+plt.title("Total Sales by Region", fontsize=14)
+plt.xlabel("Region", fontsize=12)
+plt.ylabel("Sales", fontsize=12)
 plt.xticks(rotation=0)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.show()
+
+# 5. Pie chart: Sales Distribution by Region
 plt.figure(figsize=(7, 7))
 region_sales.plot(
     kind="pie",
-    autopct="%1.1f%%"
+    autopct="%1.1f%%",
+    startangle=90,
+    colors=["#ff9999", "#66b3ff", "#99ff99", "#ffcc99"]
 )
-plt.title("Sales Distribution by Region")
+plt.title("Sales Distribution by Region", fontsize=14)
 plt.ylabel("")
 plt.show()
-top_regions = region_sales.sort_values(
-    ascending=False
-)
+
+# 6. Sort top performing regions
+top_regions = region_sales.sort_values(ascending=False)
 print("\nTop Performing Regions:")
 print(top_regions)
-region_category_sales = df.groupby(
-    ["region", "category"]
-)["sales"].sum()
+
+# 7. Region and Category Sales Pivot
+region_category_sales = df.groupby(["region", "category"])["sales"].sum()
 print("\nSales by Region and Category:")
 print(region_category_sales)
+
 pivot_data = df.pivot_table(
     values="sales",
     index="region",
@@ -54,15 +76,19 @@ pivot_data = df.pivot_table(
     aggfunc="sum",
     fill_value=0
 )
-print("\nRegion and Category Sales:")
+print("\nRegion and Category Sales (Pivot Table):")
 print(pivot_data)
+
+# 8. Grouped Bar Chart: Sales by Region and Category
 pivot_data.plot(
     kind="bar",
-    figsize=(10, 6)
+    figsize=(10, 6),
+    edgecolor="black"
 )
-plt.title("Sales by Region and Category")
-plt.xlabel("Region")
-plt.ylabel("Sales")
+plt.title("Sales by Region and Category", fontsize=14)
+plt.xlabel("Region", fontsize=12)
+plt.ylabel("Sales", fontsize=12)
 plt.xticks(rotation=0)
 plt.legend(title="Category")
+plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.show()
