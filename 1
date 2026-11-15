@@ -1,47 +1,101 @@
-import pandas as pd 
-from sklearn.decomposition import PCA 
-from sklearn.preprocessing import StandardScaler 
-import matplotlib.pyplot as plt 
-df = pd.read_csv(r"C:\Users\Software Lab-12\Downloads\Wine.csv") 
-print(df.keys()) 
-print(df.Customer_Segment.unique()) 
-print(df.isnull().sum()) 
-X = df.drop('Customer_Segment', axis=1) 
-y = df['Customer_Segment'] 
-sc = StandardScaler() 
-X = sc.fit_transform(X) 
-pca = PCA() 
-X_pca = pca.fit_transform(X) 
-explained_variance_ratio = pca.explained_variance_ratio_ 
-plt.plot( 
-range(1, len(explained_variance_ratio) + 1), 
-explained_variance_ratio.cumsum(), 
-marker='o', 
-linestyle='--' 
-) 
-plt.xlabel('Number of Principal Components') 
-plt.ylabel('Cumulative Explained Variance') 
-plt.title('Explained Variance Ratio') 
-plt.show() 
-n_components = 12 
-pca = PCA(n_components=n_components) 
-X_pca = pca.fit_transform(X) 
-red_indices = y[y == 1].index 
-white_indices = y[y == 2].index 
-plt.scatter( 
-X_pca[red_indices, 0], 
-X_pca[red_indices, 1], 
-c='red', 
-label='Red Wine' 
-) 
-plt.scatter( 
-X_pca[white_indices, 0], 
-X_pca[white_indices, 1], 
-c='blue', 
-label='White Wine' 
-) 
-plt.xlabel('Principal Component 1') 
-plt.ylabel('Principal Component 2') 
-plt.legend() 
-plt.title('PCA: Red Wine vs. White Wine') 
+
+# Import libraries
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+
+# Step 1: Load dataset
+df = pd.read_csv("Winedataset.csv")
+
+# Remove unwanted spaces from column names
+df.columns = df.columns.str.strip()
+
+# Step 2: Display dataset information
+print("Dataset Columns:")
+print(df.columns.tolist())
+
+print("\nUnique Wine Classes:")
+print(df['class'].unique())
+
+print("\nMissing Values:")
+print(df.isnull().sum())
+
+# Step 3: Separate features (X) and target (y)
+X = df.drop('class', axis=1)
+y = df['class']
+
+# Step 4: Standardize the data
+sc = StandardScaler()
+X = sc.fit_transform(X)
+
+# Step 5: Apply PCA
+pca = PCA()
+X_pca = pca.fit_transform(X)
+
+# Step 6: Calculate explained variance ratio
+explained_variance_ratio = pca.explained_variance_ratio_
+
+print("\nExplained Variance Ratio:")
+print(explained_variance_ratio)
+
+# Step 7: Plot cumulative explained variance
+plt.figure(figsize=(8, 5))
+
+plt.plot(
+    range(1, len(explained_variance_ratio) + 1),
+    explained_variance_ratio.cumsum(),
+    marker='o',
+    linestyle='--'
+)
+
+plt.xlabel('Number of Principal Components')
+plt.ylabel('Cumulative Explained Variance')
+plt.title('PCA - Explained Variance Ratio')
+plt.grid()
+plt.show()
+
+# Step 8: Apply PCA with 2 components
+n_components = 2
+
+pca = PCA(n_components=n_components)
+X_pca = pca.fit_transform(X)
+
+print("\nReduced Dataset Shape:")
+print(X_pca.shape)
+
+# Step 9: Separate wine classes
+class_1 = y == 1
+class_2 = y == 2
+class_3 = y == 3
+
+# Step 10: Visualize PCA results
+plt.figure(figsize=(8, 6))
+
+plt.scatter(
+    X_pca[class_1, 0],
+    X_pca[class_1, 1],
+    c='red',
+    label='Wine Class 1'
+)
+
+plt.scatter(
+    X_pca[class_2, 0],
+    X_pca[class_2, 1],
+    c='blue',
+    label='Wine Class 2'
+)
+
+plt.scatter(
+    X_pca[class_3, 0],
+    X_pca[class_3, 1],
+    c='green',
+    label='Wine Class 3'
+)
+
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.title('PCA: Wine Classification')
+plt.legend()
+plt.grid()
 plt.show()
